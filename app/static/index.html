@@ -1,0 +1,35 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Supervisório IIoT</title>
+  <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+  <header>
+    <div><span class="mark">RS</span><strong>Supervisório IIoT</strong></div>
+    <div class="connection"><i id="connection-dot"></i><span id="connection-text">Conectando...</span></div>
+  </header>
+  <main>
+    <section class="intro">
+      <div><p class="eyebrow">PLANTA DEMONSTRATIVA</p><h1>Monitoramento de máquinas</h1><p>Telemetria em tempo real via MQTT, histórico operacional e detecção de condições anormais.</p></div>
+      <a href="/docs" target="_blank">Documentação da API ↗</a>
+    </section>
+    <section id="summary" class="summary">
+      <article><span>Máquinas</span><b id="total-machines">—</b></article>
+      <article><span>Em operação normal</span><b id="normal-machines">—</b></article>
+      <article><span>Com advertência</span><b id="warning-machines">—</b></article>
+      <article><span>Em estado crítico</span><b id="critical-machines">—</b></article>
+    </section>
+    <h2>Estado dos equipamentos</h2>
+    <section id="machines" class="machines"><p class="empty">Aguardando telemetria...</p></section>
+    <div class="section-title"><h2>Alarmes recentes</h2><span>Limites demonstrativos</span></div>
+    <section class="alarm-panel">
+      <div class="table-wrap"><table><thead><tr><th>Horário</th><th>Máquina</th><th>Nível</th><th>Ocorrência</th></tr></thead><tbody id="alarms"><tr><td colspan="4">Nenhum alarme registrado.</td></tr></tbody></table></div>
+    </section>
+  </main>
+  <footer>Projeto demonstrativo de Automação Industrial · Dados simulados</footer>
+  <script src="/static/app.js"></script>
+</body>
+</html>
