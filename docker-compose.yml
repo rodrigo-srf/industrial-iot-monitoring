@@ -1,0 +1,49 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: industrial
+      POSTGRES_USER: industrial
+      POSTGRES_PASSWORD: industrial
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U industrial"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  mosquitto:
+    image: eclipse-mosquitto:2
+    ports:
+      - "1883:1883"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config:ro
+
+  api:
+    build: .
+    environment:
+      DATABASE_URL: postgresql+psycopg://industrial:industrial@postgres:5432/industrial
+      MQTT_HOST: mosquitto
+      MQTT_PORT: 1883
+      MQTT_ENABLED: "true"
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      mosquitto:
+        condition: service_started
+
+  simulator:
+    build: .
+    command: ["python", "-m", "simulator.publisher"]
+    environment:
+      MQTT_HOST: mosquitto
+      MQTT_PORT: 1883
+      SIMULATOR_INTERVAL: 2
+    depends_on:
+      - mosquitto
+
+volumes:
+  postgres_data:
