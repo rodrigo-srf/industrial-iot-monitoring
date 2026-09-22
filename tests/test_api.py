@@ -38,11 +38,25 @@ def test_create_and_list_measurement():
 
 def test_rejects_invalid_machine_id():
     with TestClient(app) as client:
-        response = client.post("/api/measurements", json={
-            "machine_id": "motor 01!",
-            "temperature_c": 70,
-            "vibration_mm_s": 2,
-            "current_a": 10,
-            "rpm": 1700,
-        })
+        response = client.post(
+            "/api/measurements",
+            json={
+                "machine_id": "motor 01!",
+                "temperature_c": 70,
+                "vibration_mm_s": 2,
+                "current_a": 10,
+                "rpm": 1700,
+            },
+        )
         assert response.status_code == 422
+
+
+def test_prometheus_metrics_endpoint():
+    with TestClient(app) as client:
+        client.get("/api/machines")
+        response = client.get("/metrics")
+
+        assert response.status_code == 200
+        assert "text/plain" in response.headers["content-type"]
+        assert "industrial_http_requests_total" in response.text
+        assert "industrial_http_request_duration_seconds" in response.text
