@@ -8,6 +8,7 @@ from sqlalchemy import desc, func, select, text
 from sqlalchemy.orm import Session
 
 from app.database import Base, engine, get_db
+from app.metrics import install_metrics
 from app.models import Measurement
 from app.mqtt_client import collector
 from app.schemas import MeasurementOut, TelemetryIn
@@ -25,9 +26,11 @@ async def lifespan(app: FastAPI):
 app = FastAPI(
     title="Monitoramento Industrial com MQTT",
     description="API demonstrativa de telemetria, alarmes e histórico para máquinas industriais.",
-    version="1.0.0",
+    version="1.1.0",
     lifespan=lifespan,
 )
+
+install_metrics(app)
 
 STATIC_DIR = Path(__file__).parent / "static"
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -41,7 +44,11 @@ def dashboard():
 @app.get("/api/health")
 def health(db: Session = Depends(get_db)):
     db.execute(text("SELECT 1"))
-    return {"api": "online", "database": "online", "mqtt": "connected" if collector.connected else "disconnected"}
+    return {
+        "api": "online",
+        "database": "online",
+        "mqtt": "connected" if collector.connected else "disconnected",
+    }
 
 
 @app.post("/api/measurements", response_model=MeasurementOut, status_code=201)
@@ -71,7 +78,11 @@ def machines(db: Session = Depends(get_db)):
         .group_by(Measurement.machine_id)
         .subquery()
     )
-    query = select(Measurement).join(latest, Measurement.id == latest.c.latest_id).order_by(Measurement.machine_id)
+    query = (
+        select(Measurement)
+        .join(latest, Measurement.id == latest.c.latest_id)
+        .order_by(Measurement.machine_id)
+    )
     return [MeasurementOut.model_validate(item) for item in db.scalars(query)]
 
 
