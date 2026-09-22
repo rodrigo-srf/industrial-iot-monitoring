@@ -38,9 +38,10 @@ jobs:
 
       - name: Run tests with coverage
         env:
+          PYTHONPATH: .
           DATABASE_URL: sqlite:///./industrial_ci.db
           MQTT_ENABLED: "false"
-        run: pytest -q --cov=app --cov-report=term-missing
+        run: python -m pytest -q --cov=app --cov-report=term-missing
 
       - name: Audit Python dependencies
         run: pip-audit -r requirements.txt
